@@ -76,6 +76,9 @@ jobs:
           - python-version: 3.11
             pycp: cp311-cp311
             pylib: python311.lib
+          - python-version: 3.12
+            pycp: cp312-cp312
+            pylib: python312.lib
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -155,6 +158,10 @@ jobs:
             pycp: cp39-cp39
           - python-version: 3.10
             pycp: cp310-cp310
+          - python-version: 3.11
+            pycp: cp311-cp311
+          - python-version: 3.12
+            pycp: cp312-cp312
     steps:
       - name: Checkout
         uses: actions/checkout@v3
