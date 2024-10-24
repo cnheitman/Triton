@@ -201,6 +201,10 @@ jobs:
         run: |
           sudo python -m pip install build
 
+      - name: Install Ninja
+        run: |
+          brew install ninja
+
       - name: Install Meson
         run: |
           python -m pip install meson
