@@ -214,5 +214,11 @@ setup(
     ],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    install_requires=[]
+    install_requires=[],
+    options={
+        'bdist_wheel': {
+            'py_limited_api': 'cp38',
+            'plat-name': 'manylinux_2_34_x86_64'
+        }
+    }
 )

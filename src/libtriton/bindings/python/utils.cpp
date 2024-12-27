@@ -14,30 +14,6 @@
 #include <limits>
 
 
-#if PY_VERSION_HEX >= 0x030C0000
-
-  #define tt_GET_OB_DIGIT(obj) obj->long_value.ob_digit
-  #define tt_SET_OB_DIGIT(obj, n) obj->long_value.lv_tag = (n << 3) | (obj->long_value.lv_tag & 3)
-  #define tt_PyLong_IsNegative(obj) ((obj->long_value.lv_tag & 3) == 2)
-  #define tt_PyLong_DigitCount(obj) (obj->long_value.lv_tag >> 3)
-
-#elif PY_VERSION_HEX >= 0X030A00F0
-
-  #define tt_GET_OB_DIGIT(obj) obj->ob_digit
-  #define tt_SET_OB_DIGIT(obj, n) Py_SET_SIZE(obj, n)
-  #define tt_PyLong_IsNegative(obj) (Py_SIZE(obj) < 0)
-  #define tt_PyLong_DigitCount(obj) (tt_PyLong_IsNegative(obj) ? -Py_SIZE(obj) : Py_SIZE(obj))
-
-#else
-
-  #define tt_GET_OB_DIGIT(obj) obj->ob_digit
-  #define tt_SET_OB_DIGIT(obj, n) Py_SIZE(obj) = n
-  #define tt_PyLong_IsNegative(obj) (Py_SIZE(obj) < 0)
-  #define tt_PyLong_DigitCount(obj) (tt_PyLong_IsNegative(obj) ? -Py_SIZE(obj) : Py_SIZE(obj))
-
-#endif
-
-
 namespace triton {
   namespace bindings {
     namespace python {
@@ -46,13 +22,7 @@ namespace triton {
         return (PyObject_IsTrue(obj) != 0);
       }
 
-
       triton::__uint PyLong_AsUint(PyObject* vv) {
-        triton::__uint x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -60,28 +30,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint(): Bad internal call.");
+        }
+
+        triton::__uint value = triton::__uint(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::usize PyLong_AsUsize(PyObject* vv) {
-        triton::usize x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -89,28 +58,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUsize(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUsize(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUsize(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUsize(): Bad internal call.");
+        }
+
+        triton::usize value = triton::usize(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::uint32 PyLong_AsUint32(PyObject* vv) {
-        triton::uint32 x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -118,28 +86,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint32(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint32(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint32(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint32(): Bad internal call.");
+        }
+
+        triton::uint32 value = (triton::uint32) triton::uint64(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::uint64 PyLong_AsUint64(PyObject* vv) {
-        triton::uint64 x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -147,28 +114,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint64(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint64(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint64(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint64(): Bad internal call.");
+        }
+
+        triton::uint64 value = triton::uint64(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::uint128 PyLong_AsUint128(PyObject* vv) {
-        triton::uint128 x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -176,28 +142,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint128(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint128(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint128(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint128(): Bad internal call.");
+        }
+
+        triton::uint128 value = triton::uint128(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::uint256 PyLong_AsUint256(PyObject* vv) {
-        triton::uint256 x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -205,28 +170,27 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint256(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint256(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint256(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint256(): Bad internal call.");
+        }
+
+        triton::uint256 value = triton::uint256(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
       triton::uint512 PyLong_AsUint512(PyObject* vv) {
-        triton::uint512 x = 0, prev = 0;
-        PyLongObject* v = nullptr;
-        Py_ssize_t i = 0;
-        bool n = false;
-
         if (vv == NULL || !PyLong_Check(vv)) {
           if (vv != NULL && PyInt_Check(vv)) {
             return PyInt_AsLong(vv);
@@ -234,19 +198,23 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint512(): Bad internal call.");
         }
 
-        v = reinterpret_cast<PyLongObject*>(vv);
-        n = tt_PyLong_IsNegative(v);
-        i = tt_PyLong_DigitCount(v);
-        x = 0;
-
-        while (--i >= 0) {
-          prev = x;
-          x = (x << PyLong_SHIFT) | tt_GET_OB_DIGIT(v)[i];
-          if ((x >> PyLong_SHIFT) != prev)
-            throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint512(): long int too large to convert.");
+        // Convert PyLong to string
+        PyObject* py_str = PyObject_Str(vv);
+        if (!py_str) {
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint512(): Bad internal call.");
         }
 
-        return (n ? ((~x)+1) : x);
+        const char* str_value = PyUnicode_AsUTF8(py_str);
+        if (!str_value) {
+          Py_DECREF(py_str);
+          throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint512(): Bad internal call.");
+        }
+
+        triton::uint512 value = triton::uint512(str_value);
+
+        Py_DECREF(py_str);
+
+        return value;
       }
 
 
@@ -255,31 +223,21 @@ namespace triton {
         #if defined(__i386) || defined(_M_IX86)
         return PyInt_FromLong(static_cast<long>(value));
         #else
-        PyLongObject* v;
-        triton::__uint t;
-        int ndigits = 0;
-
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::__uint  to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
         #endif
       }
 
@@ -289,31 +247,21 @@ namespace triton {
         #if defined(__i386) || defined(_M_IX86)
         return PyInt_FromLong(static_cast<long>(value));
         #else
-        PyLongObject* v;
-        triton::usize t;
-        int ndigits = 0;
-
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::usize to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
         #endif
       }
 
@@ -326,128 +274,83 @@ namespace triton {
 
       /* Returns a PyObject from a 64-bits integer */
       PyObject* PyLong_FromUint64(triton::uint64 value) {
-        PyLongObject* v;
-        triton::uint64 t;
-        int ndigits = 0;
-
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::uint32 to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
       }
 
 
       /* Returns a PyObject from a 128-bits integer */
-      PyObject* PyLong_FromUint128(triton::uint128 value) {
-        PyLongObject* v;
-        triton::uint128 t;
-        int ndigits = 0;
-
+      PyObject* PyLong_FromUint256(triton::uint128 value) {
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::uint128 to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
       }
 
 
       /* Returns a PyObject from a 256-bits integer */
       PyObject* PyLong_FromUint256(triton::uint256 value) {
-        PyLongObject* v;
-        triton::uint256 t;
-        int ndigits = 0;
-
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::uint256 to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
       }
 
 
-      /* Returns a PyObject from a 512-bits integer */
+      /* Returns a PyObject from a 256-bits integer */
       PyObject* PyLong_FromUint512(triton::uint512 value) {
-        PyLongObject* v;
-        triton::uint512 t = 0;
-        int ndigits = 0;
-
         // it is mandatory to let Python deal with small numbers (static objects)
         if (value <= std::numeric_limits<long>::max())
           return PyInt_FromLong(static_cast<long>(value));
 
-        /* Count the number of Python digits. */
-        t = value;
-        while (t) {
-          ++ndigits;
-          t >>= PyLong_SHIFT;
+        std::ostringstream oss;
+        oss << value;
+        std::string value_str = oss.str();
+
+        // Create a PyLong from the string
+        PyObject* py_long = PyLong_FromString(value_str.c_str(), nullptr, 10);
+        if (!py_long) {
+          throw std::runtime_error("Failed to convert triton::uint512 to PyLong");
         }
 
-        v = _PyLong_New(ndigits);
-        digit* p = tt_GET_OB_DIGIT(v);
-        tt_SET_OB_DIGIT(v, ndigits);
-
-        while (value) {
-          *p++ = static_cast<digit>(value & PyLong_MASK);
-          value >>= PyLong_SHIFT;
-        }
-
-        return (PyObject*)v;
+        return py_long;
       }
 
     }; /* python namespace */
   }; /* bindings namespace */
 }; /* triton namespace */
-
-#undef tt_GET_OB_DIGIT
-#undef tt_SET_OB_DIGIT
-#undef tt_PyLong_IsNegative
-#undef tt_PyLong_DigitCount
