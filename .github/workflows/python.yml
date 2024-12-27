@@ -29,62 +29,23 @@ jobs:
                 --volume ${{env.LLVM_PATH}}:/llvm \
                 build-triton-linux-x86_64 bash /src/src/scripts/docker/build-wheel-linux.sh
 
-      - name: Upload Wheel packages (Python 3.9)
+      - name: Upload Wheel package
         uses: actions/upload-artifact@v4
         with:
-          name: triton_library-${{ env.package-version }}-cp39-cp39-manylinux_2_34_x86_64.whl
-          path: wheelhouse/manylinux_2_34_x86_64/triton_library-${{ env.package-version }}-cp39-cp39-manylinux_2_34_x86_64.whl
-          if-no-files-found: warn
-
-      - name: Upload Wheel packages (Python 3.10)
-        uses: actions/upload-artifact@v4
-        with:
-          name: triton_library-${{ env.package-version }}-cp310-cp310-manylinux_2_34_x86_64.whl
-          path: wheelhouse/manylinux_2_34_x86_64/triton_library-${{ env.package-version }}-cp310-cp310-manylinux_2_34_x86_64.whl
-          if-no-files-found: warn
-
-      - name: Upload Wheel packages (Python 3.11)
-        uses: actions/upload-artifact@v4
-        with:
-          name: triton_library-${{ env.package-version }}-cp311-cp311-manylinux_2_34_x86_64.whl
-          path: wheelhouse/manylinux_2_34_x86_64/triton_library-${{ env.package-version }}-cp311-cp311-manylinux_2_34_x86_64.whl
-          if-no-files-found: warn
-
-      - name: Upload Wheel packages (Python 3.12)
-        uses: actions/upload-artifact@v4
-        with:
-          name: triton_library-${{ env.package-version }}-cp312-cp312-manylinux_2_34_x86_64.whl
-          path: wheelhouse/manylinux_2_34_x86_64/triton_library-${{ env.package-version }}-cp312-cp312-manylinux_2_34_x86_64.whl
-          if-no-files-found: warn
-
-      - name: Upload Wheel packages (Python 3.13)
-        uses: actions/upload-artifact@v4
-        with:
-          name: triton_library-${{ env.package-version }}-cp313-cp313-manylinux_2_34_x86_64.whl
-          path: wheelhouse/manylinux_2_34_x86_64/triton_library-${{ env.package-version }}-cp313-cp313-manylinux_2_34_x86_64.whl
+          name: triton_library-${{ env.package-version }}-cp38-abi3-manylinux_2_34_x86_64.whl
+          path: wheelhouse/manylinux_2_31_x86_64/triton_library-${{ env.package-version }}-cp38-abi3-manylinux_2_34_x86_64.whl
           if-no-files-found: warn
 
   build-windows:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.8']
         include:
-          - python-version: 3.9
-            pycp: cp39-cp39
-            pylib: python39.lib
-          - python-version: 3.10
-            pycp: cp310-cp310
-            pylib: python310.lib
-          - python-version: 3.11
-            pycp: cp311-cp311
-            pylib: python311.lib
-          - python-version: 3.12
-            pycp: cp312-cp312
-            pylib: python312.lib
-          - python-version: 3.13
-            pycp: cp313-cp313
-            pylib: python313.lib
+          - python-version: 3.8
+            pycp: cp38-cp38
+            pylib: python38.lib
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -140,13 +101,13 @@ jobs:
         run: |
           python -m pip install delvewheel
 
-          delvewheel repair --add-path ${{ github.workspace }}\z3-4.12.2-x64-win\bin --wheel-dir ${{ github.workspace }}\wheelhouse\windows_x86_64 -v ${{ github.workspace }}\wheelhouse\windows_x86_64_tmp\triton_library-${{ env.package-version }}-${{ matrix.pycp }}-win_amd64.whl
+          delvewheel repair --add-path ${{ github.workspace }}\z3-4.12.2-x64-win\bin --wheel-dir ${{ github.workspace }}\wheelhouse\windows_x86_64 -v ${{ github.workspace }}\wheelhouse\windows_x86_64_tmp\triton_library-${{ env.package-version }}-cp38-abi3-win_amd64.whl
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: triton_library-${{ env.package-version }}-${{ matrix.pycp }}-win_amd64.whl
-          path: ${{ github.workspace }}\wheelhouse\windows_x86_64\triton_library-${{ env.package-version }}-${{ matrix.pycp }}-win_amd64.whl
+          name: triton_library-${{ env.package-version }}-cp38-abi3-win_amd64.whl
+          path: ${{ github.workspace }}\wheelhouse\windows_x86_64\triton_library-${{ env.package-version }}-cp38-abi3-win_amd64.whl
           if-no-files-found: warn
 
   # NOTE Temporarily disabled until issues with macos-14 get resolved.
