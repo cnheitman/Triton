@@ -167,13 +167,13 @@ class CMakeBuild(build_ext):
 
         if platform.system() == "Linux":
             src_filename = os.path.join(self.build_temp + '/src/libtriton', 'triton.so')
-            dst_filename = os.path.join(self.build_lib, os.path.basename(filename))
+            dst_filename = os.path.join(self.build_lib, 'triton.so')
         elif platform.system() == "Darwin":
             src_filename = os.path.join(self.build_temp + '/src/libtriton', 'libtriton.dylib')
-            dst_filename = os.path.join(self.build_lib, os.path.basename(filename))
+            dst_filename = os.path.join(self.build_lib, 'libtriton.dylib')
         elif platform.system() == "Windows":
             src_filename = os.path.join(self.build_temp + '\\src\\libtriton\\Release', 'triton.pyd')
-            dst_filename = os.path.join(self.build_lib, os.path.basename(filename))
+            dst_filename = os.path.join(self.build_lib, 'triton.pyd')
         else:
             raise Exception(f'Platform not supported: {platform.system()}')
 
@@ -217,8 +217,7 @@ setup(
     install_requires=[],
     options={
         'bdist_wheel': {
-            'py_limited_api': 'cp38',
-            'plat-name': 'manylinux_2_34_x86_64'
+            'py_limited_api': 'cp38'
         }
     }
 )

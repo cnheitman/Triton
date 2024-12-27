@@ -42,7 +42,7 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint(): Bad internal call.");
         }
 
-        triton::__uint value = triton::__uint(str_value);
+        triton::__uint value = (triton::__uint) std::strtoul(str_value, 0, 10);
 
         Py_DECREF(py_str);
 
@@ -70,7 +70,7 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUsize(): Bad internal call.");
         }
 
-        triton::usize value = triton::usize(str_value);
+        triton::usize value = (triton::usize) std::strtoull(str_value, 0, 10);
 
         Py_DECREF(py_str);
 
@@ -98,7 +98,7 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint32(): Bad internal call.");
         }
 
-        triton::uint32 value = (triton::uint32) triton::uint64(str_value);
+        triton::uint32 value = std::strtoul(str_value, 0, 10);
 
         Py_DECREF(py_str);
 
@@ -126,7 +126,7 @@ namespace triton {
           throw triton::exceptions::Bindings("triton::bindings::python::PyLong_AsUint64(): Bad internal call.");
         }
 
-        triton::uint64 value = triton::uint64(str_value);
+        triton::uint64 value = std::strtoull(str_value, 0, 10);
 
         Py_DECREF(py_str);
 
