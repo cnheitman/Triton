@@ -1546,7 +1546,8 @@ namespace triton {
         PyObject* op2 = nullptr;
 
         /* Extract arguments */
-        PyArg_ParseTuple(args, "|OO", &op1, &op2);
+        if (PyArg_ParseTuple(args, "|OO", &op1, &op2) == false)
+          return PyErr_Format(PyExc_TypeError, "AstContext::select(): Invalid arguments.");
 
         if (op1 == nullptr || !PyAstNode_Check(op1))
           return PyErr_Format(PyExc_TypeError, "select(): expected a AstNode as first argument");
