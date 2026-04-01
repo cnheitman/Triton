@@ -1573,7 +1573,8 @@ namespace triton {
         PyObject* op3 = nullptr;
 
         /* Extract arguments */
-        PyArg_ParseTuple(args, "|OOO", &op1, &op2, &op3);
+        if (PyArg_ParseTuple(args, "|OOO", &op1, &op2, &op3) == false)
+          return PyErr_Format(PyExc_TypeError, "AstContext::store(): Invalid arguments.");
 
         if (op1 == nullptr || !PyAstNode_Check(op1))
           return PyErr_Format(PyExc_TypeError, "store(): expected a AstNode as first argument");
