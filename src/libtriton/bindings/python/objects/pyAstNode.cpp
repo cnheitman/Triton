@@ -817,7 +817,6 @@ namespace triton {
           default:
             result = Py_NotImplemented;
             Py_INCREF(result);
-            Py_DECREF(other);
             return result;
         }
 
