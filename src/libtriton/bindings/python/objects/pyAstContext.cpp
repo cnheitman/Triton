@@ -1758,11 +1758,13 @@ namespace triton {
           return PyErr_Format(PyExc_TypeError, "z3ToTriton(): expected an ExprRef as argument");
 
         PyObject* z3AstPtrValue = PyObject_GetAttrString(z3AstPtr, "value");
+        Py_DECREF(z3AstPtr);
         if (z3AstPtrValue == nullptr)
           return PyErr_Format(PyExc_TypeError, "z3ToTriton(): expected an ExprRef as argument");
 
         try {
           Z3_ast z3Ast    = reinterpret_cast<Z3_ast>(PyLong_AsVoidPtr(z3AstPtrValue));
+          Py_DECREF(z3AstPtrValue);
           z3::expr z3Expr = z3::to_expr(z3Ctx, z3Ast);
 
           return PyAstNode(z3ToTritonAst.convert(z3Expr));
