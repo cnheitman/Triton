@@ -1697,8 +1697,13 @@ namespace triton {
         }
 
         // z3.main_ctx().ctx.value
-        PyObject* z3MainCtx = PyObject_CallObject(PyObject_GetAttrString(z3mod, "main_ctx"), nullptr);
-        PyObject* z3CtxPtr  = PyObject_GetAttrString(PyObject_GetAttrString(z3MainCtx, "ctx"), "value");
+        PyObject* z3MainCtxFn = PyObject_GetAttrString(z3mod, "main_ctx");
+        PyObject* z3MainCtx   = PyObject_CallObject(z3MainCtxFn, nullptr);
+        Py_DECREF(z3MainCtxFn);
+        PyObject* z3CtxObj = PyObject_GetAttrString(z3MainCtx, "ctx");
+        PyObject* z3CtxPtr = PyObject_GetAttrString(z3CtxObj, "value");
+        Py_DECREF(z3CtxObj);
+
         Z3_context z3Ctx    = reinterpret_cast<Z3_context>(PyLong_AsVoidPtr(z3CtxPtr));
         Py_DECREF(z3CtxPtr);
         Py_DECREF(z3MainCtx);
@@ -1715,9 +1720,15 @@ namespace triton {
         }
 
         // retAst = ctypes.c_void_p(ctx_ptr); retAst.__class__ = z3.Ast
-        PyObject* pyArgs = Py_BuildValue("(O)", PyLong_FromVoidPtr(ast));
-        PyObject* retAst = PyObject_CallObject(PyObject_GetAttrString(z3mod, "c_void_p"), pyArgs);
-        PyObject_SetAttrString(retAst, "__class__", PyObject_GetAttrString(z3mod, "Ast"));
+        PyObject* astLong = PyLong_FromVoidPtr(ast);
+        PyObject* pyArgs = Py_BuildValue("(O)", astLong);
+        Py_DECREF(astLong);
+        PyObject* c_void_p_fn = PyObject_GetAttrString(z3mod, "c_void_p");
+        PyObject* retAst = PyObject_CallObject(c_void_p_fn, pyArgs);
+        Py_DECREF(c_void_p_fn);
+        PyObject* astClass = PyObject_GetAttrString(z3mod, "Ast");
+        PyObject_SetAttrString(retAst, "__class__", astClass);
+        Py_DECREF(astClass);
         Py_DECREF(pyArgs);
 
         // return z3.ExprRef(ast)
