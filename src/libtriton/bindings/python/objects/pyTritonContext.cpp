@@ -1570,8 +1570,11 @@ namespace triton {
             for (auto it2 = model.begin(); it2 != model.end(); it2++) {
               xPyDict_SetItem(mdict, PyLong_FromUsize(it2->first), PySolverModel(it2->second));
             }
-            if (model.size() > 0)
+            if (model.size() > 0) {
               PyList_SetItem(ret, index++, mdict);
+            } else {
+              Py_DECREF(mdict);
+            }
           }
         }
         catch (const triton::exceptions::PyCallbacks&) {
