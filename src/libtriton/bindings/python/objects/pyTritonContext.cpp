@@ -545,6 +545,9 @@ namespace triton {
                 if (ret == nullptr) {
                   throw triton::exceptions::PyCallbacks();
                 }
+
+                /* Release ret */
+                Py_DECREF(ret);
                 /********* End of lambda *********/
               }, cb));
               break;
@@ -578,6 +581,9 @@ namespace triton {
                 if (ret == nullptr) {
                   throw triton::exceptions::PyCallbacks();
                 }
+
+                /* Release ret */
+                Py_DECREF(ret);
                 /********* End of lambda *********/
               }, cb));
               break;
@@ -613,6 +619,9 @@ namespace triton {
                 if (ret == nullptr) {
                   throw triton::exceptions::PyCallbacks();
                 }
+
+                /* Release ret */
+                Py_DECREF(ret);
                 /********* End of lambda *********/
               }, cb));
               break;
@@ -648,6 +657,9 @@ namespace triton {
                 if (ret == nullptr) {
                   throw triton::exceptions::PyCallbacks();
                 }
+
+                /* Release ret */
+                Py_DECREF(ret);
                 /********* End of lambda *********/
               }, cb));
               break;
@@ -688,6 +700,11 @@ namespace triton {
 
                 /* Update node */
                 node = PyAstNode_AsAstNode(ret);
+
+                /* Release ret */
+                Py_DECREF(ret);
+
+                /* Return AST node */
                 return node;
                 /********* End of lambda *********/
               }, cb));
